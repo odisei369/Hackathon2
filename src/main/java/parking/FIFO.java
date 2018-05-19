@@ -1,3 +1,4 @@
+package parking;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,14 +31,14 @@ import java.util.stream.Collectors;
 
 class FIFO{
     private int currentRoute = 0;
-    private Vehicle[] vehicles;
+    private FIFOVehicle[] vehicles;
     private Gate[] gates;
     private Route[] routes;
     private List<ChangeEvent> changeEvents = new ArrayList<>();
     private List<GateEvent> gateEvents = new ArrayList<>();
 
 
-    public FIFO(Route[] routes, Gate[] gates, Vehicle[] vehicles){
+    public FIFO(Route[] routes, Gate[] gates, FIFOVehicle[] vehicles){
         this.routes = routes;
         this.gates = gates;
         this.vehicles = vehicles;
@@ -53,9 +54,9 @@ class FIFO{
             if(gates[gateId].busyUntil <= timestamp){
                 gates[gateId].busyUntil = timestamp + vehicles[vehicleId].numberOfPallet * 1;
                 Route route = routes[currentRoute++];
-                gateEvent = new GateEvent();
+                GateEvent gateEvent = new GateEvent();
                 gateEvent.setRoute(route);
-                gateEvent.setVehicle(vehicles[vehicleId]);
+                gateEvent.setVehicle(vehicles[vehicleId].getVehicle());
                 gateEvent.setLoading(true);
                 gateEvent.setGate(gates[gateId]);
                 gateEvent.setStart(timestamp);
@@ -81,9 +82,9 @@ class FIFO{
                 vehicles[vehicleId].route = null;
                 vehicles[vehicleId].status = "unloading";
                 vehicles[vehicleId].currentTakenGate = gates[gateId];
-                gateEvent = new GateEvent();
+                GateEvent gateEvent = new GateEvent();
                 gateEvent.setRoute(route);
-                gateEvent.setVehicle(vehicles[vehicleId]);
+                gateEvent.setVehicle(vehicles[vehicleId].getVehicle());
                 gateEvent.setLoading(false);
                 gateEvent.setGate(gates[gateId]);
                 gateEvent.setStart(timestamp);
@@ -150,14 +151,21 @@ class ChangeEvent{
     }
 }
 
-class Vehicle{
+class FIFOVehicle{
     int id;
     int numberOfPallet = 10;
     Route route;
     String status = "doing nothing";
     Gate currentTakenGate;
-    Vehicle(int id){
+    FIFOVehicle(int id){
         this.id = id;
+    }
+    private Vehicle vehicle;
+    
+    Vehicle getVehicle() {
+    	if (vehicle == null) 
+    		vehicle = new Vehicle(10);
+    	return vehicle;
     }
 }
 

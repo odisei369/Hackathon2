@@ -61,6 +61,12 @@ public class Vehicle {
 		return routeList;
 	}
 	
+	public List<HackathonEvent> getAllEvents() {
+		List<HackathonEvent> result = new ArrayList<>(gateEventList);
+		result.addAll(routeList);
+		return result;
+	}
+	
 	
 	
 	

@@ -9,22 +9,22 @@ public class GateEvent extends HackathonEvent{
         return "GateEvent";
     }
 
-    public int getRoute() {
+    public Route getRoute() {
 		return route;
 	}
 	public void setRoute(Route route) {
 		this.route = route;
     }
-    public int getLoading() {
+    public boolean getLoading() {
 		return loading;
     }
-    public int getUnloading() {
+    public boolean getUnloading() {
 		return !loading;
 	}
 	public void setLoading(boolean loading) {
 		this.loading = loading;
     }
-    public int getGate() {
+    public Gate getGate() {
 		return gate;
 	}
 	public void setGate(Gate gate) {
