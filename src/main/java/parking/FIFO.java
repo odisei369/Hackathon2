@@ -55,7 +55,10 @@ class FIFO{
                 gates[gateId].busyUntil = timestamp + vehicles[vehicleId].numberOfPallet * 1;
                 Route route = routes[currentRoute++];
                 GateEvent gateEvent = new GateEvent();
-                gateEvent.setRoute(new RouteEvent());
+                RouteEvent re = new RouteEvent();
+                re.setDuration(route.completionTime - route.start);
+                re.setGateEvent(gateEvent);
+                gateEvent.setRoute(re);
                 gateEvent.setVehicle(vehicles[vehicleId].getVehicle());
                 gateEvent.setLoadingTrue();
                 gateEvent.setGate(gateId);
@@ -83,7 +86,9 @@ class FIFO{
                 vehicles[vehicleId].status = "unloading";
                 vehicles[vehicleId].currentTakenGate = gates[gateId];
                 GateEvent gateEvent = new GateEvent();
-                gateEvent.setRoute(new RouteEvent());
+                RouteEvent re = new RouteEvent();
+                re.setDuration(route.completionTime - route.start);
+                gateEvent.setRoute(re);
                 gateEvent.setVehicle(vehicles[vehicleId].getVehicle());
                 gateEvent.setUnloadingTrue();
                 gateEvent.setGate(gateId);
