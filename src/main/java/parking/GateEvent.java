@@ -1,7 +1,7 @@
 package parking;
 
 public class GateEvent extends HackathonEvent{
-    RouteEvent route;
+    //RouteEvent route;
     boolean loading;
     boolean unloading;
     int gateNo;
@@ -26,12 +26,12 @@ public class GateEvent extends HackathonEvent{
         return "GateEvent";
     }
 
-    public RouteEvent getRoute() {
-		return route;
-	}
-	public void setRoute(RouteEvent route) {
-		this.route = route;
-    }
+//    public RouteEvent getRoute() {
+//		return route;
+//	}
+//	public void setRoute(RouteEvent route) {
+//		this.route = route;
+//    }
     public boolean getLoading() {
 		return loading;
     }

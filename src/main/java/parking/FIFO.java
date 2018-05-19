@@ -35,10 +35,13 @@ class FIFO{
     private Gate[] gates;
     private Route[] routes;
     private List<ChangeEvent> changeEvents = new ArrayList<>();
-    private List<GateEvent> gateEvents = new ArrayList<>();
+    private List<GateEvent> gateEvents;
+    private List<RouteEvent> routeEvents;
 
 
-    public FIFO(Route[] routes, Gate[] gates, FIFOVehicle[] vehicles){
+    public FIFO(Route[] routes, Gate[] gates, FIFOVehicle[] vehicles, List<GateEvent> gateEvents, List<RouteEvent> routeEvents){
+        this.routeEvents = routeEvents;
+        this.gateEvents = gateEvents;
         this.routes = routes;
         this.gates = gates;
         this.vehicles = vehicles;
@@ -58,7 +61,8 @@ class FIFO{
                 RouteEvent re = new RouteEvent();
                 re.setDuration(route.completionTime - route.start);
                 re.setGateEvent(gateEvent);
-                gateEvent.setRoute(re);
+//                gateEvent.setRoute(re);
+                routeEvents.add(re);
                 gateEvent.setVehicle(vehicles[vehicleId].getVehicle());
                 gateEvent.setLoadingTrue();
                 gateEvent.setGate(gateId);
@@ -88,7 +92,7 @@ class FIFO{
                 GateEvent gateEvent = new GateEvent();
                 RouteEvent re = new RouteEvent();
                 re.setDuration(route.completionTime - route.start);
-                gateEvent.setRoute(re);
+//                gateEvent.setRoute(re);
                 gateEvent.setVehicle(vehicles[vehicleId].getVehicle());
                 gateEvent.setUnloadingTrue();
                 gateEvent.setGate(gateId);

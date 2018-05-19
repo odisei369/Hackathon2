@@ -1,5 +1,7 @@
 package parking;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class RouteEvent extends HackathonEvent {
 
 	private GateEvent gateEvent;
