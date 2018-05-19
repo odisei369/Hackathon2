@@ -1,33 +1,50 @@
 package parking;
 
 public class GateEvent extends HackathonEvent{
-    Route route;
+    RouteEvent route;
     boolean loading;
-    Gate gate;
+    boolean unloading;
+    int gateNo;
+    
+    public GateEvent() {
+    	loading = false;
+    	unloading = false;
+    }
 
     public String getType(){
         return "GateEvent";
     }
 
-    public Route getRoute() {
+    public RouteEvent getRoute() {
 		return route;
 	}
-	public void setRoute(Route route) {
+	public void setRoute(RouteEvent route) {
 		this.route = route;
     }
     public boolean getLoading() {
 		return loading;
     }
     public boolean getUnloading() {
-		return !loading;
+		return unloading;
 	}
-	public void setLoading(boolean loading) {
-		this.loading = loading;
+    
+	public void setLoadingTrue() {
+		loading = true;
     }
-    public Gate getGate() {
-		return gate;
+	
+	public void setUnloadingTrue() {
+		unloading = true;
 	}
-	public void setGate(Gate gate) {
-		this.gate = gate;
+    public int getGate() {
+		return gateNo;
+	}
+	public void setGate(int gate) {
+		this.gateNo = gate;
     }
+
+	@Override
+	public int getDuration() {
+		return (loading && unloading) ? getVehicle().getCapacity()*2 : getVehicle().getCapacity();
+	}
+	
 }
