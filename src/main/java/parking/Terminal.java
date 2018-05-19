@@ -4,6 +4,9 @@ import java.util.*;
 
 public class Terminal {
 
+	public static final int TOTAL_GATES_NO = 70;
+	
+	private int totalGates;
 	private List<Vehicle> listOfVehicles;
 	private List<RouteEvent> listOfRouteEvents;
 	private List<GateEvent> listOfGateEvents;

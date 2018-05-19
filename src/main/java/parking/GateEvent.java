@@ -6,6 +6,17 @@ public class GateEvent extends HackathonEvent{
     boolean unloading;
     int gateNo;
     
+    private int start;
+    
+    @Override
+    public int getStart() {
+    	return start;
+    }
+    
+    public void setStart(int start) {
+    	this.start = start;
+    }
+    
     public GateEvent() {
     	loading = false;
     	unloading = false;

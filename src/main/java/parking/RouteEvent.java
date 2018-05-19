@@ -41,6 +41,10 @@ public class RouteEvent extends HackathonEvent {
 		duration += howMuch;
 	}
 	
+	public int getStart() {
+		return gateEvent.getEnd();
+	}
+	
 	
 	
 	

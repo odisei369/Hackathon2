@@ -4,17 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public abstract class HackathonEvent {
 
-	private int start;
 	abstract public String getType();
 	
 	@JsonIgnore
 	private Vehicle vehicle;
-	public int getStart() {
-		return start;
-	}
-	public void setStart(int start) {
-		this.start = start;
-	}
+	abstract public int getStart();
 	
 	abstract public int getDuration();
 	
@@ -26,7 +20,7 @@ public abstract class HackathonEvent {
 	}
 	
 	public int getEnd() {
-		return start + getDuration();
+		return getStart() + getDuration();
 	}
 	
 }
