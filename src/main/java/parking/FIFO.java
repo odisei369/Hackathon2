@@ -66,7 +66,6 @@ class FIFO{
                 gateEvent.setVehicle(vehicles[vehicleId].getVehicle());
                 gateEvent.setLoadingTrue();
                 gateEvent.setGate(gateId);
-                gateEvent.setVehicleId(vehicleId);
                 gateEvent.setStart(timestamp);
                 //gateEvent.setDuration(timestamp + vehicles[vehicleId].numberOfPallet * 1);
                 gateEvents.add(gateEvent);
@@ -95,7 +94,6 @@ class FIFO{
                 re.setDuration(route.completionTime - route.start);
 //                gateEvent.setRoute(re);
                 gateEvent.setVehicle(vehicles[vehicleId].getVehicle());
-                gateEvent.setVehicleId(vehicleId);
                 gateEvent.setUnloadingTrue();
                 gateEvent.setGate(gateId);
                 gateEvent.setStart(timestamp);
