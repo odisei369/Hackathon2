@@ -69,6 +69,8 @@ public class Terminal {
 		return terminal;
 	}
 	
+	
+	
 	public List<Vehicle> getListOfVehicles() {
 		return listOfVehicles;
 	}
