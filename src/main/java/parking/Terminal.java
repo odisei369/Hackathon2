@@ -22,16 +22,20 @@ public class Terminal {
 		for (int i = 0; i<gates.length; i++){
 			gates[i] = new Gate(i);
 		}
+		listOfVehicles = new ArrayList<>();
 		FIFOVehicle[] vehicles = new FIFOVehicle[2];
 		for (int i = 0; i<vehicles.length; i++){
 			vehicles[i] = new FIFOVehicle(i);
+			listOfVehicles.add(new Vehicle(vehicles[i].numberOfPallet));
 		}
 		listOfGateEvents = new ArrayList<>();
 		listOfRouteEvents = new ArrayList<>();
-		fifo = new FIFO(routes, gates, vehicles, listOfGateEvents, listOfRouteEvents);
+		fifo = new FIFO(routes, gates, vehicles, listOfGateEvents, listOfRouteEvents, listOfVehicles);
 		fifo.simulate();
 		System.out.println("number of gate events: " + listOfGateEvents.size());
 		System.out.println("number of route events: " + listOfRouteEvents.size());
+		System.out.println("number of vehicle events: " + listOfVehicles.size());
+
 
 //		Vehicle[] elements = {
 //				new Vehicle(10), new Vehicle(30), new Vehicle(40)

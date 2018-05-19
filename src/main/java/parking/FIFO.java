@@ -37,15 +37,17 @@ class FIFO{
     private List<ChangeEvent> changeEvents = new ArrayList<>();
     private List<GateEvent> gateEvents;
     private List<RouteEvent> routeEvents;
+    private List<Vehicle> listOfVehicles;
 
 
-    public FIFO(Route[] routes, Gate[] gates, FIFOVehicle[] vehicles, List<GateEvent> gateEvents, List<RouteEvent> routeEvents){
+    public FIFO(Route[] routes, Gate[] gates, FIFOVehicle[] vehicles, List<GateEvent> gateEvents, List<RouteEvent> routeEvents, List<Vehicle> listOfVehicles){
         this.routeEvents = routeEvents;
         this.gateEvents = gateEvents;
+        this.listOfVehicles = listOfVehicles;
         this.routes = routes;
         this.gates = gates;
         this.vehicles = vehicles;
-        eventAt(0, 11, 50);
+        //eventAt(0, 11, 50);
     }
 
     public void eventAt(int vehicleId, int time, int addedTime){
@@ -58,16 +60,24 @@ class FIFO{
                 gates[gateId].busyUntil = timestamp + vehicles[vehicleId].numberOfPallet * 1;
                 Route route = routes[currentRoute++];
                 GateEvent gateEvent = new GateEvent();
-                RouteEvent re = new RouteEvent();
-                re.setDuration(route.completionTime - route.start);
-                re.setGateEvent(gateEvent);
-//                gateEvent.setRoute(re);
-                routeEvents.add(re);
                 gateEvent.setVehicle(vehicles[vehicleId].getVehicle());
                 gateEvent.setLoadingTrue();
                 gateEvent.setGate(gateId);
                 gateEvent.setVehicleId(vehicleId);
                 gateEvent.setStart(timestamp);
+
+                RouteEvent re = new RouteEvent();
+
+
+                re.setDuration(route.takeSoMuchTime);
+                re.setGateEvent(gateEvent);
+                re.setVehicleId(vehicleId);
+                Vehicle vh = listOfVehicles.get(vehicleId);
+                vh.addGateEvent(gateEvent);
+                vh.addRoute(re);
+//                gateEvent.setRoute(re);
+                routeEvents.add(re);
+
                 //gateEvent.setDuration(timestamp + vehicles[vehicleId].numberOfPallet * 1);
                 gateEvents.add(gateEvent);
                 vehicles[vehicleId].route = route;
@@ -91,8 +101,8 @@ class FIFO{
                 vehicles[vehicleId].status = "unloading";
                 vehicles[vehicleId].currentTakenGate = gates[gateId];
                 GateEvent gateEvent = new GateEvent();
-                RouteEvent re = new RouteEvent();
-                re.setDuration(route.completionTime - route.start);
+                Vehicle vh = listOfVehicles.get(vehicleId);
+                vh.addGateEvent(gateEvent);
 //                gateEvent.setRoute(re);
                 gateEvent.setVehicle(vehicles[vehicleId].getVehicle());
                 gateEvent.setVehicleId(vehicleId);

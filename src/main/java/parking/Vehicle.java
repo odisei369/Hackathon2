@@ -13,6 +13,8 @@ public class Vehicle {
 	private List<GateEvent> gateEventList;
 	
 	private int capacity;
+
+	private int id;
 	
 	private List<RouteEvent> routeList;
 	
@@ -26,6 +28,14 @@ public class Vehicle {
 		capacity = DEFAULT_CAPACITY;
 		gateEventList = new ArrayList<>();
 		routeList = new ArrayList<>();
+	}
+
+	public void setId(int id){
+		this.id = id;
+	}
+
+	public int getId(){
+		return id;
 	}
 	
 	public VehicleStatus getStatusAtTime(int time) {
