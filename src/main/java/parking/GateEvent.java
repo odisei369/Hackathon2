@@ -7,6 +7,7 @@ public class GateEvent extends HackathonEvent{
     int gateNo;
     
     private int start;
+    
     @Override
     public int getStart() {
     	return start;
