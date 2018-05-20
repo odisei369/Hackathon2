@@ -3,6 +3,8 @@
   <head>
     <meta charset="utf-8">
     <!-- development version, includes helpful console warnings -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.0.2/sockjs.js"></script>
+    <script src="stomp.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <!-- production version, optimized for size and speed -->
     <!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
@@ -61,6 +63,28 @@
 </html>
 
 <script type="text/javascript">
+    function connect() {
+        var socket = new SockJS('/gs-guide-websocket');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('/topic/greetings', function (greeting) {
+                receivedMessage(JSON.parse(greeting.body).content);
+            });
+        });
+    }
+
+    (function () {
+        connect();
+    }());
+
+    function sendReload() {
+        stompClient.send("/app/hello", {}, JSON.stringify({'name': "reload"}));
+    }
+
+    function receivedMessage(message) {
+        //reload data when receive
+    }
 var app = new Vue({
   el: '#app',
   data: {

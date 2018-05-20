@@ -55,6 +55,28 @@
 </html>
 
 <script type="text/javascript">
+    function connect() {
+        var socket = new SockJS('/gs-guide-websocket');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('/topic/greetings', function (greeting) {
+                receivedMessage(JSON.parse(greeting.body).content);
+            });
+        });
+    }
+
+    (function () {
+        connect();
+    }());
+
+    function sendReload() {
+        stompClient.send("/app/hello", {}, JSON.stringify({'name': "reload"}));
+    }
+
+    function receivedMessage(message) {
+        //reload data when receive
+    }
 var app = new Vue({
   el: '#app',
   data: {
