@@ -46,7 +46,7 @@
               <div class="timeblock" :style="'min-width:' + 60*scale + 'px'" v-for="time in timeline">{{time}}:00</div>
             </div>
             <div class="gateData">
-              <div :class="['event', {gateEvent:event.type==='GateEvent', routeEvent:event.type==='RouteEvent', unloading:event.unloading}]" :style="'min-width:' + event.duration*scale + 'px; max-width:' + event.duration*scale + 'px'" v-for="(event, index) in events" :title="JSON.stringify(event)">{{event.gate}}</div>
+              <div :class="['event', {gateEvent:event.type==='GateEvent', routeEvent:event.type==='RouteEvent', unloading:event.unloading}]" :style="'min-width:' + event.duration*scale + 'px; max-width:' + event.duration*scale + 'px'" v-for="(event, index) in events" :title="getHumanReadable(event)">{{event.gate}}</div>
             </div>
           </div>
         </div>
@@ -173,6 +173,15 @@ var app = new Vue({
       }
       console.log(routes);
       return routes
+    },
+    getHumanReadable(obj){
+      let start = `${6 + Math.floor(obj.start / 60)}:${obj.start % 60}`
+      let end = `${6 + Math.floor(obj.end / 60)}:${obj.end % 60}`
+      let names = {
+        'RouteEvent': 'Trasa',
+        'GateEvent': 'Postój na bramie'
+      }
+      return `${names[obj.type]} - ${obj.loading ? 'załadunek,' : obj.type === 'GateEvent' ? 'rozładunek,' : ''} start: ${start}, koniec: ${end}`
     }
   },
   filters: {
