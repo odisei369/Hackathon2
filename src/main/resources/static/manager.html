@@ -3,8 +3,6 @@
   <head>
     <meta charset="utf-8">
     <!-- development version, includes helpful console warnings -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.0.2/sockjs.js"></script>
-    <script src="stomp.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <!-- production version, optimized for size and speed -->
     <!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
@@ -77,8 +75,7 @@
     }
 
     function receivedMessage(message) {
-        console.log("getting data");
-        app.getData();
+        //reload data when receive
     }
 var app = new Vue({
   el: '#app',
@@ -147,13 +144,19 @@ var app = new Vue({
       }
     },
     getHumanReadable(obj){
-      let start = `${6 + Math.floor(obj.start / 60)}:${obj.start % 60}`
-      let end = `${6 + Math.floor(obj.end / 60)}:${obj.end % 60}`
+      let startHour = `${6 + Math.floor(obj.start / 60)}}`
+      let startMinutes = obj.start % 60
+      startMinutes = startMinutes < 10 ? '0'+startMinutes : startMinutes
+
+      let endHour = `${6 + Math.floor(obj.end / 60)}}`
+      let endMinutes = obj.end % 60
+      endMinutes = endMinutes < 10 ? '0'+endMinutes : endMinutes
+
       let names = {
         'RouteEvent': 'Trasa',
         'GateEvent': 'Postój na bramie'
       }
-      return `${names[obj.type]} - ${obj.loading ? 'załadunek,' : obj.type === 'GateEvent' ? 'rozładunek,' : ''} start: ${start}, koniec: ${end}`
+      return `${names[obj.type]} - ${obj.loading ? 'załadunek,' : obj.type === 'GateEvent' ? 'rozładunek,' : ''} start: ${startHour}:${startMinutes}, koniec: ${endHour}:${endMinutes}`
     }
   },
   filters: {
