@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class RouteEvent extends HackathonEvent {
 
+	static String className = "RouteEvent";
+
 	private GateEvent gateEvent;
 
 	private int duration;

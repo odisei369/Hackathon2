@@ -51,7 +51,11 @@ class FIFO{
     }
 
     public void eventAt(int vehicleId, int time, int addedTime){
-            changeEvents.add(new ChangeEvent(vehicleId, time, addedTime));
+            List<HackathonEvent> events = listOfVehicles.get(vehicleId).getAllEvents();
+            events.forEach(event ->{
+                if(event.getStart() < time && time < event.getEnd() && event.getType().equals(RouteEvent.className))
+                    changeEvents.add(new ChangeEvent(vehicleId, time, addedTime));
+            });
     }
 
     private boolean tryLoadTruck(int vehicleId, int timestamp, int oldGateId){
@@ -134,14 +138,30 @@ class FIFO{
         return list.stream().filter(o -> o.getTime().equals(time)).collect(Collectors.toList());
     }
 
+    private void clearData(){
+        currentRoute = 0;
+        for (int i = 0; i< vehicles.length; i++){
+            vehicles[i].route = null;
+            vehicles[i].currentTakenGate = null;
+            vehicles[i].status = "doing nothing";
+        }
+        for (int i = 0; i < gates.length; i++){
+            gates[i].busyUntil = 0;
+        }
+    }
+
     public void simulate(){
         gateEvents.clear();
         routeEvents.clear();
+        clearData();
         //routes are sorted from bigger one
         int timestamp = 0;
         while(timestamp != 840){
             List<ChangeEvent> events = containsName(changeEvents, timestamp);
-            events.forEach(action -> {vehicles[action.vehicleId].route.completionTime += action.addedTime;});
+            events.forEach(action -> {
+                if(vehicles[action.vehicleId].route != null)
+                    vehicles[action.vehicleId].route.completionTime += action.addedTime;
+            });
             for(int vehicleId=0; vehicleId<vehicles.length; vehicleId++){
                 if(vehicles[vehicleId].route == null && vehicles[vehicleId].status == "doing nothing" && !(currentRoute == routes.length)){
                     tryLoadTruck(vehicleId, timestamp, -1);
