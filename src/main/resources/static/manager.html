@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pl" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <!-- development version, includes helpful console warnings -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <!-- production version, optimized for size and speed -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="/config.js" charset="utf-8"></script>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <nav>
+      <a href="/driver.html"><img src="https://www.dbschenker.com/blueprint/themes/schenker/dist/00b689b8/img/db-logo.svg" alt=""></a>
+      <h1>Panel managera</h1>
+    </nav>
+    <div id="app">
+      <div v-if="page === 0" class="page login">
+        <div class="">
+          Podaj hasło managera:
+        </div>
+        <div class="">
+          <input type="number" name="" value="" v-model="password">
+          <button type="button" name="button" @click="nextPage">Zaloguj</button>
+        </div>
+      </div>
+      <div v-if="page === 1" class="page dane">
+        <div class="controls">
+          Skala wykresu:
+          <input type="range" name="" value="" v-model="scale" min="1" max="5.0" step="0.5">
+          <button type="button" name="button" @click="getData">Pobierz aktualne dane</button>
+        </div>
+        <div class="data">
+          <div class="gatesLabels">
+            <div class="gateLabel">Brama #</div>
+            <div :class="['gateLabel', {evenColour:index%2===0}]" v-for="(gate, index) in gates">Brama {{gate}}</div>
+          </div>
+          <div class="dataTable">
+            <div class="timeline">
+              <div class="timeblock" :style="'min-width:' + 60*scale + 'px'" v-for="time in timeline">{{time}}:00</div>
+            </div>
+            <div class="gateData" v-for="gate in gates">
+              <div class="wrapEvent" v-for="(event, index) in eventsFiltered(gate)">
+                <div v-if="(index-1>=0 ? event.start - eventsFiltered(gate)[index-1].end : 0)>0" class="spacing" :style="'min-width:' + (index-1>=0 ? event.start - eventsFiltered(gate)[index-1].end : 0)*scale + 'px'"></div>
+
+                <div :class="['event', {loading:event.loading, unloading:event.unloading}]" :style="'min-width:' + event.duration*scale + 'px; max-width:' + event.duration*scale + 'px'"  :title="JSON.stringify(event)">{{event.vehicleId}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+<script type="text/javascript">
+var app = new Vue({
+  el: '#app',
+  data: {
+    login: true,
+    password: 1234,
+    page: 0,
+    data: null,
+    events: [],
+    gates: [],
+    scale: 1
+  },
+  watch: {
+  },
+  computed: {
+    timeline(){
+      let timeline = []
+      for (var i = 6; i < 20; i++) {
+        timeline.push(i)
+      }
+      return timeline
+    }
+  },
+  mounted () {
+  },
+  methods: {
+    eventsFiltered(gateNo){
+      let events = this.events.filter((item)=>{
+        return item.gate === gateNo
+      })
+      return events
+    },
+    nextPage () {
+      if (this.page === 0) {
+        this.getData()
+      }
+      this.page++
+    },
+    getData () {
+      let self = this
+      axios.get(`${config.IP}:8080/parking/allGate`)
+        .then(function (response) {
+          self.events = response.data
+          // console.log(self.data);
+          self.gates = self.getGates()
+          self.routes = self.getRouteEvents()
+          // console.log(self.gates);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
+    getGates () {
+      let gates = new Set()
+      for (let gateEvent of this.events) {
+        if (gateEvent.type === 'GateEvent') {
+          gates.add(gateEvent.gate)
+        }
+      }
+      return Array.from(gates)
+    },
+    getRouteEvents () {
+      let routes = []
+      for (let routeEvent of this.events){
+        routes.push(routeEvent)
+      }
+    }
+  },
+  filters: {
+  }
+})
+</script>
+
+<style media="screen">
+.gatesLabels{
+  width: auto;
+}
+.gateLabel {
+  font-weight: bold;
+  width: 10em;
+  margin: 2vmin 0;
+}
+.gateData{
+  display: flex;
+  /* align-items: flex-start; */
+  margin: 2vmin 0;
+  /* border-radius: 1vmin; */
+  /* flex-direction: row; */
+}
+.evenColour{
+  background: hsl(240, 33%, 52%);
+}
+.spacing{
+  min-height: 1em;
+}
+.wrapEvent{
+  display: flex;
+  flex-direction: row;
+}
+</style>

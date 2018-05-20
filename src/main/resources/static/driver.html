@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pl" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <!-- development version, includes helpful console warnings -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <!-- production version, optimized for size and speed -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="/config.js" charset="utf-8"></script>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <nav>
+      <a href="/manager.html"><img src="https://www.dbschenker.com/blueprint/themes/schenker/dist/00b689b8/img/db-logo.svg" alt=""></a>
+      <h1>Panel kierowcy</h1>
+    </nav>
+    <div id="app">
+      <div v-if="page === 0" class="page login">
+        <div class="">
+          Podaj numer auta:
+        </div>
+        <div class="">
+          <input type="number" name="" value="" v-model="vehicleNo">
+          <button type="button" name="button" @click="nextPage">Zaloguj</button>
+        </div>
+      </div>
+      <div v-if="page === 1" class="page dane">
+        <div style="background: white; color:black;">
+          Kierowca nr: {{vehicleNo}}
+        </div>
+        <div class="controls">
+          Skala wykresu:
+          <input type="range" name="" value="" v-model="scale" min="1" max="5.0" step="0.5">
+          <button type="button" name="button" @click="getData">Pobierz aktualne dane</button>
+        </div>
+        <div class="data">
+          <div class="gatesLabels">
+            <div class="gateLabel">Czas</div>
+            <div class="gateLabel">Harmonogram</div>
+          </div>
+          <div class="dataTable">
+            <div class="timeline">
+              <div class="timeblock" :style="'min-width:' + 60*scale + 'px'" v-for="time in timeline">{{time}}:00</div>
+            </div>
+            <div class="gateData">
+              <div :class="['event', {gateEvent:event.type==='GateEvent', routeEvent:event.type==='RouteEvent', unloading:event.unloading}]" :style="'min-width:' + event.duration*scale + 'px; max-width:' + event.duration*scale + 'px'" v-for="(event, index) in events" :title="JSON.stringify(event)">{{event.gate}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="actions">
+          <div class="reportDelay">
+            <button type="button" name="button" @click="reportDelay">Zgłoś opóźnienie</button>
+            <input type="text" name="" value="" v-model="delayAmount">
+            <input type="text" name="" value="" v-model="delayStart">
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+<script type="text/javascript">
+var app = new Vue({
+  el: '#app',
+  data: {
+    login: true,
+    vehicleNo: 10,
+    page: 0,
+    data: null,
+    gates: [1,2],
+    routes: [1,2],
+    events: [],
+    scale: 1,
+    delayAmount: 30,
+    delayStart: 60
+  },
+  watch: {
+  },
+  computed: {
+    timeline(){
+      let timeline = []
+      for (var i = 6; i < 20; i++) {
+        timeline.push(i)
+      }
+      return timeline
+    },
+    // events(){
+    //   return [...this.routes, ...this.gates]
+    // }
+  },
+  mounted () {
+  },
+  methods: {
+    nextPage () {
+      if (this.page === 0) {
+        this.getData()
+      }
+      this.page++
+    },
+    getData () {
+      let self = this
+      axios.get(`${config.IP}:8080/parking/veh?id=${this.vehicleNo}`)
+        .then(function (response) {
+          self.events = response.data
+          console.log(self.events);
+          // self.gates = self.getGates()
+          // self.routes = self.getRouteEvents()
+          // console.log(self.gates);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
+    reportDelay () {
+      let self = this
+      axios.post(`${config.IP}:8080/parking?id=${parseInt(this.vehicleNo)}&delayDur=${this.delayAmount}&delayStart=${this.delayStart}`)
+        .then(function (response) {
+          self.events = response.data
+          console.log(response);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
+    getGates () {
+      let gates = new Set()
+      for (let gateEvent of this.data) {
+        if (gateEvent.type === 'GateEvent') {
+          gates.add(gateEvent.gate)
+        }
+      }
+      console.log(Array.from(gates));
+      return Array.from(gates)
+    },
+    getRouteEvents () {
+      let routes = []
+      for (let event of this.data){
+        if (event.type === 'RouteEvent') {
+          routes.push(event)
+        }
+      }
+      console.log(routes);
+      return routes
+    }
+  },
+  filters: {
+  }
+})
+</script>
+
+<style media="screen">
+.gateLabel {
+  font-weight: bold;
+  width: 10em;
+  margin: 2vmin 0;
+}
+.gateData{
+  display: flex;
+  /* align-items: flex-start; */
+  border-radius: 1vmin;
+  margin: 2vmin 0;
+  /* flex-direction: row; */
+}
+
+.gateData:first{
+  border-radius: 1vmin;
+}
+
+</style>
