@@ -144,11 +144,11 @@ var app = new Vue({
       }
     },
     getHumanReadable(obj){
-      let startHour = `${6 + Math.floor(obj.start / 60)}}`
+      let startHour = `${6 + Math.floor(obj.start / 60)}`
       let startMinutes = obj.start % 60
       startMinutes = startMinutes < 10 ? '0'+startMinutes : startMinutes
 
-      let endHour = `${6 + Math.floor(obj.end / 60)}}`
+      let endHour = `${6 + Math.floor(obj.end / 60)}`
       let endMinutes = obj.end % 60
       endMinutes = endMinutes < 10 ? '0'+endMinutes : endMinutes
 
