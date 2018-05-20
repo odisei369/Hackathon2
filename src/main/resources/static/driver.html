@@ -53,8 +53,8 @@
         <div class="actions">
           <div class="reportDelay">
             <button type="button" name="button" @click="reportDelay">Zgłoś opóźnienie</button>
-            <input type="text" name="" value="" v-model="delayAmount">
-            <input type="text" name="" value="" v-model="delayStart">
+            <span>Na ile minut</span><input type="text" name="" value="" v-model="delayAmount">
+            <span>Godzina zgłoszenia</span><input type="text" name="" value="" v-model="delayStart">
           </div>
         </div>
       </div>
@@ -83,7 +83,8 @@
     }
 
     function receivedMessage(message) {
-        //reload data when receive
+        console.log("getting data");
+        app.getData();
     }
 var app = new Vue({
   el: '#app',
@@ -97,7 +98,7 @@ var app = new Vue({
     events: [],
     scale: 1,
     delayAmount: 30,
-    delayStart: 60
+    delayStart: new Date().getHours() +":"+ new Date().getMinutes()
   },
   watch: {
   },
@@ -116,6 +117,11 @@ var app = new Vue({
   mounted () {
   },
   methods: {
+      parseTime(str){
+          let array = str.split(":");
+          let count = parseInt(array[0]) * 60 + parseInt(array[1]) - 360;
+          return count;
+      },
     nextPage () {
       if (this.page === 0) {
         this.getData()
@@ -138,7 +144,7 @@ var app = new Vue({
     },
     reportDelay () {
       let self = this
-      axios.post(`${config.IP}:8080/parking?id=${parseInt(this.vehicleNo)}&delayDur=${this.delayAmount}&delayStart=${this.delayStart}`)
+      axios.post(`${config.IP}:8080/parking?id=${parseInt(this.vehicleNo)}&delayDur=${this.delayAmount}&delayStart=${this.parseTime(this.delayStart)}`)
         .then(function (response) {
           self.events = response.data
           console.log(response);
@@ -146,6 +152,7 @@ var app = new Vue({
         .catch(function (error) {
           console.log(error);
         });
+        sendReload();
     },
     getGates () {
       let gates = new Set()

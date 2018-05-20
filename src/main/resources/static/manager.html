@@ -3,6 +3,8 @@
   <head>
     <meta charset="utf-8">
     <!-- development version, includes helpful console warnings -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.0.2/sockjs.js"></script>
+    <script src="stomp.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <!-- production version, optimized for size and speed -->
     <!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
@@ -75,7 +77,8 @@
     }
 
     function receivedMessage(message) {
-        //reload data when receive
+        console.log("getting data");
+        app.getData();
     }
 var app = new Vue({
   el: '#app',
