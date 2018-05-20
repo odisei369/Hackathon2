@@ -71,6 +71,7 @@ class FIFO{
                 gateEvent.setGate(gateId);
                 gateEvent.setVehicleId(vehicleId);
                 gateEvent.setStart(timestamp);
+                gateEvent.setNumberOfPallets(vehicles[vehicleId].numberOfPallet);
 
                 RouteEvent re = new RouteEvent();
 
@@ -107,6 +108,7 @@ class FIFO{
                 vehicles[vehicleId].status = "unloading";
                 vehicles[vehicleId].currentTakenGate = gates[gateId];
                 GateEvent gateEvent = new GateEvent();
+                gateEvent.setNumberOfPallets(vehicles[vehicleId].numberOfPallet);
                 Vehicle vh = listOfVehicles.get(vehicleId);
                 vh.addGateEvent(gateEvent);
 //                gateEvent.setRoute(re);

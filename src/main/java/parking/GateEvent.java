@@ -5,13 +5,23 @@ public class GateEvent extends HackathonEvent{
     boolean loading;
     boolean unloading;
     int gateNo;
+
+    int numberOfPallets;
     
     private int start;
     @Override
     public int getStart() {
     	return start;
     }
-    
+
+    public int getNumberOfPallets() {
+        return numberOfPallets;
+    }
+
+    public void setNumberOfPallets(int numberOfPallets) {
+        this.numberOfPallets = numberOfPallets;
+    }
+
     public void setStart(int start) {
     	this.start = start;
     }
@@ -54,7 +64,7 @@ public class GateEvent extends HackathonEvent{
 
 	@Override
 	public int getDuration() {
-		return (loading && unloading) ? getVehicle().getCapacity()*2 : getVehicle().getCapacity();
+		return (loading && unloading) ? numberOfPallets*2 : numberOfPallets;
 	}
 	
 }
