@@ -54,8 +54,10 @@ class FIFO{
             changeEvents.add(new ChangeEvent(vehicleId, time, addedTime));
     }
 
-    private boolean tryLoadTruck(int vehicleId, int timestamp){
+    private boolean tryLoadTruck(int vehicleId, int timestamp, int oldGateId){
         for(int gateId = 0; gateId < gates.length; gateId++){
+            if(oldGateId >= 0)
+                gateId = oldGateId;
             if(gates[gateId].busyUntil <= timestamp){
                 gates[gateId].busyUntil = timestamp + vehicles[vehicleId].numberOfPallet * 1;
                 Route route = routes[currentRoute++];
@@ -120,8 +122,9 @@ class FIFO{
     }
     private void isUnloadEnded(int vehicleId, int timestamp){
         if(vehicles[vehicleId].currentTakenGate.busyUntil <= timestamp && !(currentRoute == routes.length)){
+            Gate gate  =  vehicles[vehicleId].currentTakenGate;
             vehicles[vehicleId].currentTakenGate = null;
-            if(!tryLoadTruck(vehicleId, timestamp)){
+            if(!tryLoadTruck(vehicleId, timestamp, gate.id)){
                 vehicles[vehicleId].status = "doing nothing";
             }
         }
@@ -141,7 +144,7 @@ class FIFO{
             events.forEach(action -> {vehicles[action.vehicleId].route.completionTime += action.addedTime;});
             for(int vehicleId=0; vehicleId<vehicles.length; vehicleId++){
                 if(vehicles[vehicleId].route == null && vehicles[vehicleId].status == "doing nothing" && !(currentRoute == routes.length)){
-                    tryLoadTruck(vehicleId, timestamp);
+                    tryLoadTruck(vehicleId, timestamp, -1);
                 } else if(vehicles[vehicleId].status == "unloading"){
                     isUnloadEnded(vehicleId, timestamp);
                 } else if(vehicles[vehicleId].status == "waiting for unload"){
