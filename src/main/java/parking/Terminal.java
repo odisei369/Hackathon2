@@ -83,4 +83,8 @@ public class Terminal {
 		result.addAll(listOfGateEvents);
 		return result;
 	}
+	
+	public void applyDelay(int id, int delayDur, int delayStart) {
+		
+	}
 }

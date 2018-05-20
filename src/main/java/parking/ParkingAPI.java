@@ -4,10 +4,12 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
 
-@RestController("parking")
+@CrossOrigin
+@RestController
+@RequestMapping(value="parking")
 public class ParkingAPI {
 
-	@GetMapping
+	@GetMapping(value="/all")
 	public List<HackathonEvent> getAllEvents() {
 		return Terminal.getTerminal().getAllEvents();
 	}
@@ -19,7 +21,7 @@ public class ParkingAPI {
 	
 	@PostMapping
 	public List<HackathonEvent> createDelay(@RequestParam int id, @RequestParam int delayDur, @RequestParam int delayStart) {
-		
+		Terminal.getTerminal().applyDelay(id,delayDur,delayStart);
 		return Terminal.getTerminal().getListOfVehicles().get(id).getAllEvents();
 	}
 	
