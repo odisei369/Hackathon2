@@ -1,6 +1,7 @@
 package parking;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Vehicle {
 	
@@ -74,7 +75,8 @@ public class Vehicle {
 	public List<HackathonEvent> getAllEvents() {
 		List<HackathonEvent> result = new ArrayList<>(gateEventList);
 		result.addAll(routeList);
-		return result;
+		Comparator<HackathonEvent> comp = Comparator.comparing(e -> e.getStart());
+		return result.stream().sorted(comp).collect(Collectors.toList());
 	}
 	
 	
