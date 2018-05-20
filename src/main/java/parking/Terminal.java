@@ -2,6 +2,7 @@ package parking;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 public class Terminal {
 
@@ -99,5 +100,9 @@ public class Terminal {
 		fifo.eventAt(id, delayStart, delayDur);
 		fifo.simulate();
 		
+	}
+	
+	public List<GateEvent> getAllGateEvents() {
+		return listOfGateEvents.stream().sorted(Comparator.comparing(e -> e.getGate())).collect(Collectors.toList());
 	}
 }
