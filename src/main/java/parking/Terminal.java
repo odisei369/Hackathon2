@@ -97,7 +97,7 @@ public class Terminal {
 	}
 	
 	public void applyDelay(int id, int delayDur, int delayStart) {
-		fifo.eventAt(id, delayStart, delayDur);
+		fifo.addChangeEventIfValidChange(id, delayStart, delayDur);
 		
 	}
 	

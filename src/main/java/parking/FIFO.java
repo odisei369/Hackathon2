@@ -2,32 +2,10 @@ package parking;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
-import java.util.stream.Stream;
 
 import parking.GateEvent;
 
 import java.util.stream.Collectors;
-
-
-// class GateEvent{
-//     Vehicle vehicle;
-//     Route route;
-//     int start;
-//     int end;
-//     boolean loading;
-//     boolean unload;
-//     Gate gate;
-
-//     public GateEvent(Vehicle vehicle, int start, Boolean load, Route route, Gate gate){
-//         this.vehicle = vehicle;
-//         this.route = route;
-//         this.gate = gate;
-//         this.start = start;
-//         this.loading = load;
-//         this.end = start + vehicle.numberOfPallet;
-//     }
-// }
 
 class FIFO{
     private int currentRoute = 0;
@@ -47,10 +25,52 @@ class FIFO{
         this.routes = routes;
         this.gates = gates;
         this.vehicles = vehicles;
-        //eventAt(0, 11, 50);
+    }
+    
+    public void simulate(){
+        gateEvents.clear();
+        routeEvents.clear();
+        clearData();
+        int timestamp = 0;
+        while(timestamp != 840){
+            List<ChangeEvent> currentChangeEvents = getChangeEventsStartingAt(changeEvents, timestamp);
+            int finalTimestamp = timestamp;
+            currentChangeEvents.forEach(chEvent -> {
+                if(vehicles[chEvent.vehicleId].route != null && finalTimestamp == chEvent.startTime)
+                    vehicles[chEvent.vehicleId].route.completionTime += chEvent.duration;
+                RouteEvent ro = listOfVehicles.get(chEvent.vehicleId).getRouteEventAt(finalTimestamp); //not affected by 'safety' if above
+                ro.elongate(chEvent.duration);
+
+            });
+            for(int vehicleId=0; vehicleId<vehicles.length; vehicleId++){
+                processVehicle(vehicleId,timestamp);
+            }
+            timestamp++;
+        }
+    }
+    
+    public void processVehicle(int vehicleId, int timestamp) {
+    	if(isVehicleFreeAndRoutesAvailable(vehicleId)){
+            tryLoadTruck(vehicleId, timestamp, -1);
+        } else if(vehicles[vehicleId].status == "unloading"){
+            isUnloadEnded(vehicleId, timestamp);
+        } else if(vehicles[vehicleId].status == "waiting for unload"){
+            tryUnload(vehicleId, timestamp);
+        } else if(vehicles[vehicleId].route != null && vehicles[vehicleId].route.start == timestamp){
+            vehicles[vehicleId].currentTakenGate = null;
+            vehicles[vehicleId].status = "on route";
+            System.out.println("vehicle " + vehicleId + " on route");
+        } else if(vehicles[vehicleId].route != null && vehicles[vehicleId].route.completionTime <= timestamp){
+            vehicles[vehicleId].status = "waiting for unload";
+            tryUnload(vehicleId, timestamp);
+        }
+    }
+    
+    public boolean isVehicleFreeAndRoutesAvailable(int vehicleId) {
+    	return vehicles[vehicleId].route == null && vehicles[vehicleId].status == "doing nothing" && !(currentRoute == routes.length);
     }
 
-    public void eventAt(int vehicleId, int time, int addedTime){
+    public void addChangeEventIfValidChange(int vehicleId, int time, int addedTime){
             List<HackathonEvent> events = listOfVehicles.get(vehicleId).getAllEvents();
             events.forEach(event ->{
                 if(event.getStart() < time && time < event.getEnd() && event.getType().equals(RouteEvent.className))
@@ -62,71 +82,80 @@ class FIFO{
     private boolean tryLoadTruck(int vehicleId, int timestamp, int oldGateId){
         for(int gateId = 0; gateId < gates.length; gateId++){
             if(oldGateId >= 0)
-                gateId = oldGateId;
-            if(gates[gateId].busyUntil <= timestamp){
-                gates[gateId].busyUntil = timestamp + vehicles[vehicleId].numberOfPallet * 1;
-                Route route = routes[currentRoute++];
-                GateEvent gateEvent = new GateEvent();
-                gateEvent.setVehicle(vehicles[vehicleId].getVehicle());
-                gateEvent.setLoadingTrue();
-                gateEvent.setGate(gateId);
-                gateEvent.setVehicleId(vehicleId);
-                gateEvent.setStart(timestamp);
-                gateEvent.setNumberOfPallets(vehicles[vehicleId].numberOfPallet);
-
-                RouteEvent re = new RouteEvent();
-
-
-                re.setDuration(route.takeSoMuchTime);
-                re.setGateEvent(gateEvent);
-                re.setVehicleId(vehicleId);
-                Vehicle vh = listOfVehicles.get(vehicleId);
-                vh.addGateEvent(gateEvent);
-                vh.addRoute(re);
-//                gateEvent.setRoute(re);
-                routeEvents.add(re);
-
-                //gateEvent.setDuration(timestamp + vehicles[vehicleId].numberOfPallet * 1);
-                gateEvents.add(gateEvent);
-                vehicles[vehicleId].route = route;
-                vehicles[vehicleId].status = "loading";
-                vehicles[vehicleId].currentTakenGate = gates[gateId];
-                System.out.println("vehicle " + vehicleId + " loading");
-                route.start = timestamp + vehicles[vehicleId].numberOfPallet;
-                route.completionTime = route.takeSoMuchTime + route.start;
+                gateId = oldGateId; //checking if any gate of bigger index is free
+            if(isGateFreeAtTime(gateId,timestamp)){
+                assignNextRouteToVehAndGate(gateId,vehicleId,timestamp);
                 return true;
             }
         }
         return false;
+    }
+    
+    public void assignNextRouteToVehAndGate(int gateId, int vehicleId, int timestamp) {
+    	gates[gateId].busyUntil = timestamp + vehicles[vehicleId].numberOfPallet * 1;
+        Route route = routes[currentRoute++];
+        GateEvent gateEvent = new GateEvent();
+        gateEvent.setVehicle(vehicles[vehicleId].getVehicle());
+        gateEvent.setLoadingTrue();
+        gateEvent.setGate(gateId);
+        gateEvent.setVehicleId(vehicleId);
+        gateEvent.setStart(timestamp);
+        gateEvent.setNumberOfPallets(vehicles[vehicleId].numberOfPallet);
+
+        RouteEvent re = new RouteEvent();
+
+
+        re.setDuration(route.takeSoMuchTime);
+        re.setGateEvent(gateEvent);
+        re.setVehicleId(vehicleId);
+        Vehicle vh = listOfVehicles.get(vehicleId);
+        vh.addGateEvent(gateEvent);
+        vh.addRoute(re);
+        routeEvents.add(re);
+        gateEvents.add(gateEvent);
+        vehicles[vehicleId].route = route;
+        vehicles[vehicleId].status = "loading";
+        vehicles[vehicleId].currentTakenGate = gates[gateId];
+        System.out.println("vehicle " + vehicleId + " loading");
+        route.start = timestamp + vehicles[vehicleId].numberOfPallet;
+        route.completionTime = route.takeSoMuchTime + route.start;
+    }
+    
+    public boolean isGateFreeAtTime(int gateId, int timestamp) {
+    	return gates[gateId].busyUntil <= timestamp;
     }
 
     private boolean tryUnload(int vehicleId, int timestamp){
         for(int gateId = 0; gateId < gates.length; gateId++){
-            if(gates[gateId].busyUntil <= timestamp){
-                gates[gateId].busyUntil = timestamp + vehicles[vehicleId].numberOfPallet * 1;
-                Route route = vehicles[vehicleId].route;
-                vehicles[vehicleId].route = null;
-                vehicles[vehicleId].status = "unloading";
-                vehicles[vehicleId].currentTakenGate = gates[gateId];
-                GateEvent gateEvent = new GateEvent();
-                gateEvent.setNumberOfPallets(vehicles[vehicleId].numberOfPallet);
-                Vehicle vh = listOfVehicles.get(vehicleId);
-                vh.addGateEvent(gateEvent);
-//                gateEvent.setRoute(re);
-                gateEvent.setVehicle(vehicles[vehicleId].getVehicle());
-                gateEvent.setVehicleId(vehicleId);
-                gateEvent.setUnloadingTrue();
-                gateEvent.setGate(gateId);
-                gateEvent.setStart(timestamp);
-                //gateEvent.setDuration(timestamp + vehicles[vehicleId].numberOfPallet * 1);
-                gateEvents.add(gateEvent);
-                System.out.println("vehicle " + vehicleId + " unloading");
+            if(isGateFreeAtTime(gateId,timestamp)){
+                unloadVehAtGateAtTime(vehicleId,gateId,timestamp);
                 return true;
             }
         }
+        //if no free gates right now then:
         System.out.println("vehicle " + vehicleId + " waiting for unload");
         return false;
     }
+    
+    public void unloadVehAtGateAtTime(int vehicleId, int gateId, int timestamp) {
+    	gates[gateId].busyUntil = timestamp + vehicles[vehicleId].numberOfPallet * 1;
+        Route route = vehicles[vehicleId].route; //we don't seem to need to store this
+        vehicles[vehicleId].route = null;
+        vehicles[vehicleId].status = "unloading";
+        vehicles[vehicleId].currentTakenGate = gates[gateId];
+        GateEvent gateEvent = new GateEvent();
+        gateEvent.setNumberOfPallets(vehicles[vehicleId].numberOfPallet);
+        Vehicle vh = listOfVehicles.get(vehicleId);
+        vh.addGateEvent(gateEvent);
+        gateEvent.setVehicle(vehicles[vehicleId].getVehicle());
+        gateEvent.setVehicleId(vehicleId);
+        gateEvent.setUnloadingTrue();
+        gateEvent.setGate(gateId);
+        gateEvent.setStart(timestamp);
+        gateEvents.add(gateEvent);
+        System.out.println("vehicle " + vehicleId + " unloading");
+    }
+    
     private void isUnloadEnded(int vehicleId, int timestamp){
         if(vehicles[vehicleId].currentTakenGate.busyUntil <= timestamp && !(currentRoute == routes.length)){
             Gate gate  =  vehicles[vehicleId].currentTakenGate;
@@ -137,8 +166,8 @@ class FIFO{
         }
     }
 
-    public List<ChangeEvent> containsName(final List<ChangeEvent> list, final int time){
-        return list.stream().filter(o -> o.getTime().equals(time)).collect(Collectors.toList());
+    public List<ChangeEvent> getChangeEventsStartingAt(final List<ChangeEvent> list, final int time){
+        return list.stream().filter(o -> o.getStartTime().equals(time)).collect(Collectors.toList());
     }
 
     private void clearData(){
@@ -156,54 +185,20 @@ class FIFO{
         }
     }
 
-    public void simulate(){
-        gateEvents.clear();
-        routeEvents.clear();
-        clearData();
-        //routes are sorted from bigger one
-        int timestamp = 0;
-        while(timestamp != 840){
-            List<ChangeEvent> events = containsName(changeEvents, timestamp);
-            int finalTimestamp = timestamp;
-            events.forEach(action -> {
-                if(vehicles[action.vehicleId].route != null && finalTimestamp == action.time)
-                    vehicles[action.vehicleId].route.completionTime += action.addedTime;
-                    RouteEvent ro = listOfVehicles.get(action.vehicleId).getRouteEventAt(finalTimestamp);
-                    ro.setDuration(ro.getDuration() + action.addedTime);
 
-            });
-            for(int vehicleId=0; vehicleId<vehicles.length; vehicleId++){
-                if(vehicles[vehicleId].route == null && vehicles[vehicleId].status == "doing nothing" && !(currentRoute == routes.length)){
-                    tryLoadTruck(vehicleId, timestamp, -1);
-                } else if(vehicles[vehicleId].status == "unloading"){
-                    isUnloadEnded(vehicleId, timestamp);
-                } else if(vehicles[vehicleId].status == "waiting for unload"){
-                    tryUnload(vehicleId, timestamp);
-                } else if(vehicles[vehicleId].route != null && vehicles[vehicleId].route.start == timestamp){
-                    vehicles[vehicleId].currentTakenGate = null;
-                    vehicles[vehicleId].status = "on route";
-                    System.out.println("vehicle " + vehicleId + " on route");
-                } else if(vehicles[vehicleId].route != null && vehicles[vehicleId].route.completionTime <= timestamp){
-                    vehicles[vehicleId].status = "waiting for unload";
-                    tryUnload(vehicleId, timestamp);
-                }
-            }
-            timestamp++;
-        }
-    }
 }
 
 class ChangeEvent{
     int vehicleId;
-    int time;
-    int addedTime;
+    int startTime;
+    int duration;
     ChangeEvent(int vehicleId, int time, int addedTime){
         this.vehicleId = vehicleId;
-        this.time = time;
-        this.addedTime = addedTime;
+        this.startTime = time;
+        this.duration = addedTime;
     }
-    Integer getTime(){
-        return time;
+    Integer getStartTime(){
+        return startTime;
     }
 }
 
@@ -245,36 +240,3 @@ class Gate{
     }
 
 }
-// public class MainApp {
-
-//     public static void main(String[] args){
-// 		Scanner s = new Scanner(System.in);
-// 		System.out.println("Enter the number of routes:");
-// 		int n = s.nextInt();
-
-//         Route[] myRoutes = new Route[n];
-// 		for(int i=0;i<n;i++){
-// 			System.out.println("Enter time for route " + i +": ");
-// 			int bur = s.nextInt();
-// 			myRoutes[i] = new Route(i,bur);
-// 		}
-
-//         System.out.println("Enter the number of gates:");
-//         int numOfGates = s.nextInt();
-//         Gate[] myGates = new Gate[numOfGates];
-//         for(int i=0;i<numOfGates;i++){
-// 			myGates[i] = new Gate(i);
-// 		}
-
-//         System.out.println("Enter the number of vehicles:");
-//         int numOfVehicles = s.nextInt();
-//         Vehicle[] myVehicles = new Vehicle[numOfVehicles];
-//         for(int i=0;i<numOfVehicles;i++){
-// 			myVehicles[i] = new Vehicle(i);
-// 		}
-
-//         FIFO fifo = new FIFO(myRoutes, myGates, myVehicles);
-//         fifo.simulate();
-//     }
-
-// }
