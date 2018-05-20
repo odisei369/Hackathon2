@@ -55,6 +55,7 @@ class FIFO{
             events.forEach(event ->{
                 if(event.getStart() < time && time < event.getEnd() && event.getType().equals(RouteEvent.className))
                     changeEvents.add(new ChangeEvent(vehicleId, time, addedTime));
+                    simulate();
             });
     }
 
@@ -163,8 +164,9 @@ class FIFO{
         int timestamp = 0;
         while(timestamp != 840){
             List<ChangeEvent> events = containsName(changeEvents, timestamp);
+            int finalTimestamp = timestamp;
             events.forEach(action -> {
-                if(vehicles[action.vehicleId].route != null)
+                if(vehicles[action.vehicleId].route != null && finalTimestamp == action.time)
                     vehicles[action.vehicleId].route.completionTime += action.addedTime;
             });
             for(int vehicleId=0; vehicleId<vehicles.length; vehicleId++){
