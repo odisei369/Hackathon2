@@ -14,6 +14,11 @@ public class ParkingAPI {
 		return Terminal.getTerminal().getAllEvents();
 	}
 	
+	@GetMapping(value="/allGate")
+	public List<GateEvent> getAllGateEvents() {
+		return Terminal.getTerminal().getAllGateEvents();
+	}
+	
 	@GetMapping(value="/veh")
 	public List<HackathonEvent> getAllEventsForVehicle(@RequestParam int id) {
 		return Terminal.getTerminal().getListOfVehicles().get(id).getAllEvents();
