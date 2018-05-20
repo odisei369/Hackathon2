@@ -78,7 +78,10 @@ public class Vehicle {
 		Comparator<HackathonEvent> comp = Comparator.comparing(e -> e.getStart());
 		return result.stream().sorted(comp).collect(Collectors.toList());
 	}
-	
+	public void newLists(){
+		gateEventList = new ArrayList<>();
+		routeList = new ArrayList<>();
+	}
 	
 	
 	

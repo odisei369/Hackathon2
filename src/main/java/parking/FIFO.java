@@ -141,6 +141,9 @@ class FIFO{
     }
 
     private void clearData(){
+        listOfVehicles.forEach(vehicle -> {
+            vehicle.newLists();
+        });
         currentRoute = 0;
         for (int i = 0; i< vehicles.length; i++){
             vehicles[i].route = null;
