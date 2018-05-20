@@ -1,37 +1,48 @@
 package parking;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Terminal {
 
-	public static final int TOTAL_GATES_NO = 70;
-	
+	public static final int TOTAL_GATES_NO = 30;
+	public static final int TOTAL_VEHICLES_NO = 100;
+	public static final int TOTAL_ROUTES_NO = 600;
+
 	private int totalGates;
 	private List<Vehicle> listOfVehicles;
 	private List<RouteEvent> listOfRouteEvents;
 	private List<GateEvent> listOfGateEvents;
 	private FIFO fifo;
 	static private Terminal terminal;
-	
-	private Terminal() {
-		Route[] routes = new Route[5];
+
+	private int randomInt(int min, int max){
+		return ThreadLocalRandom.current().nextInt(min, max + 1);
+	}
+
+	private void initializeFifoWithRandomData(){
+		Route[] routes = new Route[TOTAL_ROUTES_NO];
 		for (int i = 0; i<routes.length; i++){
-			routes[i] = new Route(i, 5);
+			routes[i] = new Route(i, randomInt(5,40));
 		}
-		Gate[] gates = new Gate[2];
+		Gate[] gates = new Gate[TOTAL_GATES_NO];
 		for (int i = 0; i<gates.length; i++){
 			gates[i] = new Gate(i);
 		}
 		listOfVehicles = new ArrayList<>();
-		FIFOVehicle[] vehicles = new FIFOVehicle[2];
+		FIFOVehicle[] vehicles = new FIFOVehicle[TOTAL_VEHICLES_NO];
 		for (int i = 0; i<vehicles.length; i++){
-			vehicles[i] = new FIFOVehicle(i);
+			vehicles[i] = new FIFOVehicle(i, randomInt(5, 15));
 			listOfVehicles.add(new Vehicle(vehicles[i].numberOfPallet));
 		}
 		listOfGateEvents = new ArrayList<>();
 		listOfRouteEvents = new ArrayList<>();
 		fifo = new FIFO(routes, gates, vehicles, listOfGateEvents, listOfRouteEvents, listOfVehicles);
 		fifo.simulate();
+	}
+
+	private Terminal() {
+		initializeFifoWithRandomData();
 		System.out.println("number of gate events: " + listOfGateEvents.size());
 		System.out.println("number of route events: " + listOfRouteEvents.size());
 		System.out.println("number of vehicle events: " + listOfVehicles.size());
@@ -85,6 +96,8 @@ public class Terminal {
 	}
 	
 	public void applyDelay(int id, int delayDur, int delayStart) {
+		fifo.eventAt(id, delayStart, delayDur);
+		fifo.simulate();
 		
 	}
 }

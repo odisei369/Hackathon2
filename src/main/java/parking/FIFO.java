@@ -132,9 +132,11 @@ class FIFO{
     }
 
     public void simulate(){
+        gateEvents.clear();
+        routeEvents.clear();
         //routes are sorted from bigger one
         int timestamp = 0;
-        while(timestamp != 480){
+        while(timestamp != 840){
             List<ChangeEvent> events = containsName(changeEvents, timestamp);
             events.forEach(action -> {vehicles[action.vehicleId].route.completionTime += action.addedTime;});
             for(int vehicleId=0; vehicleId<vehicles.length; vehicleId++){
@@ -144,15 +146,15 @@ class FIFO{
                     isUnloadEnded(vehicleId, timestamp);
                 } else if(vehicles[vehicleId].status == "waiting for unload"){
                     tryUnload(vehicleId, timestamp);
-                } else if(vehicles[vehicleId].route.start == timestamp){
+                } else if(vehicles[vehicleId].route != null && vehicles[vehicleId].route.start == timestamp){
                     vehicles[vehicleId].currentTakenGate = null;
                     vehicles[vehicleId].status = "on route";
                     System.out.println("vehicle " + vehicleId + " on route");
-                } else if(vehicles[vehicleId].route.completionTime <= timestamp){
+                } else if(vehicles[vehicleId].route != null && vehicles[vehicleId].route.completionTime <= timestamp){
                     vehicles[vehicleId].status = "waiting for unload";
                     tryUnload(vehicleId, timestamp);
                 }
-                }
+            }
             timestamp++;
         }
     }
@@ -178,8 +180,9 @@ class FIFOVehicle{
     Route route;
     String status = "doing nothing";
     Gate currentTakenGate;
-    FIFOVehicle(int id){
+    FIFOVehicle(int id, int numberOfPallet){
         this.id = id;
+        this.numberOfPallet = numberOfPallet;
     }
     private Vehicle vehicle;
     
