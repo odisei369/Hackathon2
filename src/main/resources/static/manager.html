@@ -46,7 +46,7 @@
               <div class="wrapEvent" v-for="(event, index) in eventsFiltered(gate)">
                 <div v-if="(index-1>=0 ? event.start - eventsFiltered(gate)[index-1].end : 0)>0" class="spacing" :style="'min-width:' + (index-1>=0 ? event.start - eventsFiltered(gate)[index-1].end : 0)*scale + 'px'"></div>
 
-                <div :class="['event', {loading:event.loading, unloading:event.unloading}]" :style="'min-width:' + event.duration*scale + 'px; max-width:' + event.duration*scale + 'px'"  :title="JSON.stringify(event)">{{event.vehicleId}}</div>
+                <div :class="['event', {loading:event.loading, unloading:event.unloading}]" :style="'min-width:' + event.duration*scale + 'px; max-width:' + event.duration*scale + 'px'"  :title="getHumanReadable(event)">{{event.vehicleId}}</div>
               </div>
             </div>
           </div>
@@ -145,6 +145,15 @@ var app = new Vue({
       for (let routeEvent of this.events){
         routes.push(routeEvent)
       }
+    },
+    getHumanReadable(obj){
+      let start = `${6 + Math.floor(obj.start / 60)}:${obj.start % 60}`
+      let end = `${6 + Math.floor(obj.end / 60)}:${obj.end % 60}`
+      let names = {
+        'RouteEvent': 'Trasa',
+        'GateEvent': 'Postój na bramie'
+      }
+      return `${names[obj.type]} - ${obj.loading ? 'załadunek,' : obj.type === 'GateEvent' ? 'rozładunek,' : ''} start: ${start}, koniec: ${end}`
     }
   },
   filters: {
