@@ -168,6 +168,9 @@ class FIFO{
             events.forEach(action -> {
                 if(vehicles[action.vehicleId].route != null && finalTimestamp == action.time)
                     vehicles[action.vehicleId].route.completionTime += action.addedTime;
+                    RouteEvent ro = listOfVehicles.get(action.vehicleId).getRouteEventAt(finalTimestamp);
+                    ro.setDuration(ro.getDuration() + action.addedTime);
+
             });
             for(int vehicleId=0; vehicleId<vehicles.length; vehicleId++){
                 if(vehicles[vehicleId].route == null && vehicles[vehicleId].status == "doing nothing" && !(currentRoute == routes.length)){

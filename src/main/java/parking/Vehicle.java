@@ -71,6 +71,16 @@ public class Vehicle {
 	public List<RouteEvent> getRouteList() {
 		return routeList;
 	}
+
+	public RouteEvent getRouteEventAt(int time){
+		final RouteEvent[] routeTo = new RouteEvent[1];
+		routeList.forEach(route ->{
+			if(time > route.getStart() && time < route.getEnd()){
+				routeTo[0] = route;
+			}
+		});
+		return routeTo[0];
+	}
 	
 	public List<HackathonEvent> getAllEvents() {
 		List<HackathonEvent> result = new ArrayList<>(gateEventList);
